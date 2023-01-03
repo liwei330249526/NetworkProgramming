@@ -1,0 +1,83 @@
+liwei
+TCP 客户/服务器模型
+回射客户/服务器
+socket bind listen accept connect
+
+
+tcp 客户端              tcp服务器
+
+                        socket()
+socket()
+                        bind()
+
+                        listen()
+
+                        accept()
+
+                        一致阻塞到客户端连接到达
+connnet()
+|-> write()
+|                        read()    <----
+|                                       |
+|                        处理请求        |
+|                                       |
+|                        write()   ---  |
+|_read()
+close()
+                        read()
+
+                        close()
+
+socket 函数
+头文件 <sys/socket.h>
+原型: int socket(int domain, int type, int protocol)
+domain: 协议族
+type:  socket 类型
+protocol: 协议类型, 流式:SOCK_STREAM; 数据报: SOCK_DGRAM; 原始:SOCK_RAW
+返回值: 成功返回非负整数, 与文件描述符类似, 称为套接口描述字, 或套接字
+        失败返回-1
+
+
+listen 函数
+头文件 <sys/socket.h>
+功能: 将套接字用于监听进入的连接
+原型: int listen(int sockfd, int backlog)
+参数:sockdfd: socket 函数函数返回的套接字
+     backlog: 规定内核为此套接字排队的最大连接个数
+返回值: 成功返回0, 失败返回-1
+
+一般来说, listen 函数应该在 socket 和bind 函数之后
+调用函数accept之前调用.
+对于监听的套接口, 内核需要维护两个队列
+1 由客户端发出到达服务器, 服务器正在等待完成TCP三路握手
+2 已经完成人连接的队列
+listen函数将套接字从主动套接字变为被动套接字.
+
+
+accept函数
+头文件: <sys/socket.h>
+功能:从已经连接的队列返回第一个连接, 如果已经完成连接的队列尾空, 则阻塞
+原型: int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+参数: sockfd 服务器套接字
+      addr 将返回对等放的道街子地址
+      addrlen 返回对等方套接字地址长度
+返回值: 成功返回非负整数
+       失败返回-1
+
+
+connect 函数
+头文件: <sys/socket.h>
+功能:  建立一个连接至addr所指定的套接字
+原型: int connect(int sockdfd, const struct sockaddr *addr, socklen_t addrlen);
+参数: sockdfd: 未连接的套接字
+      addr:  要连接的套接字地址
+      addrlen: 第二个参数addr 长度
+
+    返回值: 成功返回0, 失败返回-1
+
+
+netstat -an | grep TIME_WAIT
+
+服务器端尽可能使用REUSEADDR
+在绑定之前尽可能调用setsockopt来设置REUSEADDR套接字选项.
+使用REUSEADDR选项可以使得不必等待TIME_WAIT状态消失就可以重启服务器.

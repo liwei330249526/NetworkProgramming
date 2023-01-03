@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
     // 5. 允许连接
     struct sockaddr_in peeraddr;
     socklen_t peerlen = sizeof peeraddr;
-    int connfd;
+    int connfd;                             // 返回值
     if ((connfd = accept(listenfd, (struct sockaddr *) &peeraddr, &peerlen)) < 0) {
         ERR_EXIT("accept");
     }
@@ -70,10 +70,11 @@ int main(int argc, char** argv) {
         int ret = read(connfd, recvbuf, sizeof recvbuf);
         if (ret == 0)
         {
-
+            printf("ret = 0\n");                // 对边主动断开连接, 我这里主动读取一次connfd的话, 则ret == 0;
+            break;
         } else
         {
-
+            printf("ret != 0\n");
         }
         fputs(recvbuf, stdout);
         write(connfd, recvbuf, ret);

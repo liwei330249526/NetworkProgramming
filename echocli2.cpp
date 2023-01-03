@@ -53,7 +53,7 @@ int main(int argc, char** argv) {
         int ret = read(sockfd, recvbuf, sizeof recvbuf);    // 服务器读取
         if (ret == 0)
         {
-            printf("server close\n");
+            printf("server close\n");                           // 服务器关闭了, 则客户端捕捉到
             break;
         } else if (ret == -1)
         {

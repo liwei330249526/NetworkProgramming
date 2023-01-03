@@ -35,21 +35,21 @@ ssize_t readn(int fd, void *buf, size_t count)
 
     while (nleft > 0)
     {
-        nread = read(fd, bufp, nleft);
+        nread = read(fd, bufp, nleft);          // 读到了nread字节
         if (nread < 0)
         {
-            if (errno == EINTR)
+            if (errno == EINTR)                 // 被信号中断了
             {
                 continue;
             }
             return  -1;
-        } else if (nread == 0)
+        } else if (nread == 0)      // break
         {
             return count - nleft;
         }
 
-        bufp += nread;
-        nleft -= nread;
+        bufp += nread;                          // 下次读取存入位置 bufp += nread
+        nleft -= nread;                         // 还剩余 nleft -= nread 空间
     }
     return count;
 }

@@ -1,0 +1,72 @@
+liwei
+
+
+linux 地址结构
+struct sockaddr_in {
+    sa_family_t    sin_family; /* address family: AF_INET */
+    in_port_t      sin_port;   /* port in network byte order */
+    struct in_addr sin_addr;   /* internet address */
+};
+
+/* Internet address. */
+struct in_addr {
+    uint32_t       s_addr;     /* address in network byte order */
+};
+
+
+
+
+ipv4 地址结构
+struct sockaddr_in {
+    uin8_t sin_len;
+    sa_family_t    sin_family; /* address family: AF_INET */
+    in_port_t      sin_port;   /* port in network byte order */
+    struct in_addr sin_addr;   /* internet address */
+    char sin_zero[8];
+};
+
+通用地址结构
+struct sockaddr {
+    uint8_t sin_len;
+    sa_family_t sin_family;
+    char sa_data[14];        // 这 14 个字节和上面的 sin_port; sin_addr, sin_zero[8].
+}
+
+大端字节序
+最高有效位存储在最低内存地址处. 反之亦然
+
+
+小端字节序
+最搞有效位存储在最高内存地址处, 反之亦然
+
+0x12345678
+----------------->>> 内存增长方向
+
+12|34|56|78       大端     ---- 网络字节序
+
+78|56|34|12       小端
+
+
+
+字节序转换函数
+uint32_t htonl(uint32_t hostlong);
+uint32_t htons(uin516_t hostshort);
+
+uint32_t ntohl(uint32_t netlong);
+uint16_t ntohs(uint15_5, netshort);
+
+h 代表host; n代表network
+s代表short
+l代表long
+
+
+
+地址转换函数
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+int inet_aton(const char *cp, struct in_addr *inp);     // 点分10进制字符串转换为ip地址结构
+in_addr_t inet_addr(const char *cp);      // 点分10进制字符串转换为32位整数. 网络字节序
+char *inet_ntoa(struct in_addr in);      // 将ip地址的结构转换为点分十进制字符串
+
+in_addr_t 一般为32位的unsigned int.

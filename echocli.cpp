@@ -55,10 +55,11 @@ int main(int argc, char** argv) {
         int ret = read(sockfd, recvbuf, sizeof recvbuf);    // 服务器读取
         if (ret == 0)
         {
-            
+            printf("ret == 0 \n");                  // 服务器关闭了, 我这里主动读取一次 sockfd 的话会返回 0
+            break;
         } else
         {
-
+            printf("ret != 0 \n");
         }
         fputs(recvbuf, stdout); // 服务器返回数据输出
 

@@ -30,9 +30,9 @@ void do_service(int connfd)
         int ret = read(connfd, recvbuf, sizeof recvbuf);
         if (ret == 0)
         {
-            printf("client close\n");
+            printf("client close\n");                   // 客户端关闭, 服务器捕捉到
             break;
-        } else if (ret == -1)
+        } else if (ret == -1)                           // 读取失败
         {
             ERR_EXIT("read");
         }
@@ -100,8 +100,8 @@ int main(int argc, char** argv) {
         {
             close(listenfd);
             do_service(connfd);
-            //printf("child exit\n");
-            exit(EXIT_SUCCESS);
+            printf("child exit\n");
+            exit(EXIT_SUCCESS);             // 子进程退出, 合法
         }
         else
         {

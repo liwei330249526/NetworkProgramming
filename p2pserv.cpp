@@ -95,11 +95,11 @@ int main(int argc, char** argv) {
     {
         ERR_EXIT("fork");
     }
-    if (pid == 0)   // 子进程
+    if (pid == 0)   // 子进程, 循环从键盘读取数据, 并发送到对端
     {
         signal(SIGUSR1, handler);
         char sendbuf[1024];
-        while (fgets(sendbuf, sizeof sendbuf, stdin) != NULL)
+        while (fgets(sendbuf, sizeof sendbuf, stdin) != NULL)           // 循环获取输入, 并发出
         {
             write(connfd, sendbuf, sizeof sendbuf);
             memset(sendbuf, 0, sizeof(sendbuf));
@@ -107,7 +107,7 @@ int main(int argc, char** argv) {
         printf("child exit\n");
         exit(EXIT_SUCCESS);
     }
-    else
+    else                                            // 父进程循环从对端接受数据; 并捕获对端失效, 杀死子进程,用新号
     {
         char recvbuf[1024];
         while (1)
@@ -126,11 +126,12 @@ int main(int argc, char** argv) {
             fputs(recvbuf, stdout);
         }
         printf("parent exit\n");
-        kill(pid, SIGUSR1);
+        kill(pid, SIGUSR1);             // 给自己继承发送信号
         exit(EXIT_SUCCESS);
     }
 
     // 7. 断开连接
+    printf("断开连接\n");
     close(connfd);
     close(listenfd);
 

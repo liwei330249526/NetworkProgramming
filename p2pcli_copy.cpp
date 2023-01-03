@@ -1,5 +1,5 @@
 //
-// Created by jxq on 19-7-17.
+// Created by liwei on 2023.1.3.
 //
 #include <iostream>
 #include <stdio.h>
@@ -57,8 +57,19 @@ int main(int argc, char** argv) {
     {
         ERR_EXIT("fork");
     }
-    if (pid == 0)               // 子进程循环读取对端数据; 捕获对端失效, 杀死本身父进程                                         
+    if (pid == 0)                                       // 子进程, 循环获取键盘输入并发送                         
     {
+        signal(SIGUSR1, handler);
+        while (fgets(sendbuf, sizeof sendbuf, stdin) != NULL)   // 键盘输入获取
+        {
+            write(sockfd, sendbuf, sizeof sendbuf); // 写入服务器
+            // 清空
+            memset(sendbuf, 0, sizeof sendbuf);
+        }
+        printf("parent exit\n");
+       // exit(EXIT_SUCCESS);
+        close(sockfd);
+    } else{                                                      // 父进程循环从服务器读取数据; 并捕获对端失效, 杀死子进程, 用信号
 
         while (1)
         {
@@ -74,24 +85,14 @@ int main(int argc, char** argv) {
             fputs(recvbuf, stdout); // 服务器返回数据输出
         }
         printf("child exit\n");
-        kill(getppid(), SIGUSR1);           // 获取父进程 pid
+        kill(pid, SIGUSR1);
         //exit(EXIT_SUCCESS);
-        close(sockfd);
-    } else{                                                      // 父进程循环获取键盘输入, 并发送
-        signal(SIGUSR1, handler);
-        while (fgets(sendbuf, sizeof sendbuf, stdin) != NULL)   // 键盘输入获取
-        {
-            write(sockfd, sendbuf, sizeof sendbuf); // 写入服务器
-            // 清空
-            memset(sendbuf, 0, sizeof sendbuf);
-        }
-        printf("parent exit\n");
-       // exit(EXIT_SUCCESS);
         close(sockfd);
 
     }
 
     // 5. 断开连接
+    printf("断开连接\n");
     close(sockfd);
 
 
