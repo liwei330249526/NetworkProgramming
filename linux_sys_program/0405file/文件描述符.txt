@@ -1,0 +1,164 @@
+文件描述符
+1 对linux , 所有设备或文件的操作都是通过文件描述符进行的
+2 当打开或创建一个文件的时候。 内核向进程返回一个文件描述符。 后续对文件的操作， 秩序通过该文件描述符， 内核记录这个打开文件的信息
+3 一个进程启动时， 默认打开了3个文件， 标准输入， 标准输出， 标准错误。 对应文件描述符时 0（STDIN_FILENO）, 1(STDOUT_FILENO), 3(STDERR_FILENO)，
+  这些常量定义在unistd.h中
+
+  文件描述符和文件指针转换
+  fileno: 将文件指针转换为文件描述符
+  fdopen：将文件描述符转换为文件指针
+
+
+  open 系统调用
+  原型： int open(const char *path, int flags);
+  参数： path：文件的名称， 可包含路径
+        flags：文件打开模式
+  返回值：打开成功，返回文件描述符
+         打开失败，返回-1
+
+  read 系统调用
+  ssize_t read(int fd, void *buf, size_t count);
+  fd: 要读的文件描述符
+  buf:指向内存块的指针, 文件读出的字节存放在这个内存块中
+  count: 读出的字节个数
+  返回值: 错误, -1
+         文件结束, 0
+         正常, 读取到的字节数
+ 
+ write 系统调用
+ ssize_t write(int fd, const void *buf, size_t count);
+ 函数参数: 
+    fd: 要写入的文件的文件描述符
+    buf:指向内存块指针, 从这个内存块读取数据写入到文件中
+    count: 要写入文件的字节个数
+返回值:
+    如果出现错误, -1
+    如果写入成功, 成功写入文件的字节数
+    无效,      0
+
+ssize_t   有符号整数
+size_t    无符号整数
+
+666
+022
+644
+
+newmode = mode & ~ umask
+
+
+访问权限   man 2 open
+S_IRWXU  00700 user (file owner) has read, write, and execute permission
+
+S_IRUSR  00400 user has read permission
+
+S_IWUSR  00200 user has write permission
+
+S_IXUSR  00100 user has execute permission
+
+S_IRWXG  00070 group has read, write, and execute permission
+
+S_IRGRP  00040 group has read permission
+
+S_IWGRP  00020 group has write permission
+
+S_IXGRP  00010 group has execute permission
+
+S_IRWXO  00007 others have read, write, and execute permission
+
+S_IROTH  00004 others have read permission
+
+S_IWOTH  00002 others have write permission
+
+S_IXOTH  00001 others have execute permission
+
+According to POSIX, the effect when other bits are set in mode is unspecified.  On Linux, the following bits are also honored in mode:
+
+S_ISUID  0004000 set-user-ID bit
+
+S_ISGID  0002000 set-group-ID bit (see inode(7)).
+
+S_ISVTX  0001000 sticky bit (see inode(7)).
+
+
+ulimit -a
+real-time non-blocking time  (microseconds, -R) unlimited
+core file size              (blocks, -c) 0
+data seg size               (kbytes, -d) unlimited
+scheduling priority                 (-e) 0
+file size                   (blocks, -f) unlimited
+pending signals                     (-i) 15289
+max locked memory           (kbytes, -l) 498501
+max memory size             (kbytes, -m) unlimited
+open files                          (-n) 1024
+pipe size                (512 bytes, -p) 8
+POSIX message queues         (bytes, -q) 819200
+real-time priority                  (-r) 0
+stack size                  (kbytes, -s) 8192
+cpu time                   (seconds, -t) unlimited
+max user processes                  (-u) 15289
+virtual memory              (kbytes, -v) unlimited
+file locks                          (-x) unlimite
+
+
+cat /proc/sys/fs/file-max   系统支持的最大打开文件个数
+9223372036854775807
+
+
+lseek 系统调用
+重定位curp
+原型: off_t lseek(int fd, off_t offset, int base);
+参数: fd: 需要设置的文件标识符
+      offset: 偏移量
+      base: 搜索的起始位置 
+返回值: 返回新的文件偏移值 
+
+base: 表示搜索的起始位置, 有一下几种值, 在<unistd.h>定义
+SEEK_SET: 从文件开始出计算偏移
+SEEK_CUR: 从当前文件的偏移值计算偏移
+SEEK_END: 从文件的结束出计算偏移
+
+
+od -c hole.txt 查看文件的实际内容
+
+du -h hole.txt  显示文件在磁盘4k
+
+
+空洞文件 07
+lseek(fd, 1024*1024*1024, SEEK_CUR);
+ls -lh hole.txt     显示文件大小单位G   1.1G
+ls -l hole.txt        8k
+
+
+目录访问
+功能: 打开一个目录
+原型: DIR* opendir(char *pathname);
+参数: pathname, 文件路径名
+返回值: 成功, 返回目录指针
+       失败, 返回 0
+
+功能: 范文指定目录中的下一个连接细节
+原型: struct dirent* readdir(DIR *dirptr);
+参数: dirptr, 目录指针
+返回值: 返回一个纸箱dirent结构的指针, 它包括指定目录的下一个连接细节
+        没有更多连接时, 返回0
+
+目录信息结构
+struct dirent {
+    long d_ino;  /* inode number*/
+    off_t d_off; /* offset to this dirent */
+    unsigned short d_reclen;  /* length of this d_name */
+    char d_name[NAME_MAX+1]; /* file name (null-terminated) */
+}
+
+rmdir
+功能说明: 删除一个空目录
+原型: int rmdir(char *pathname);
+参数: pathname, 文件路径名
+返回值: 调用成功,0
+        调用失败,-1
+
+chmod fchmod 
+功能说明: 用来改变给定路径名的pathname文件权限位
+原型: int chmod(char pathname, mode_t mode);
+返回值: 成功, 0
+        失败, -1

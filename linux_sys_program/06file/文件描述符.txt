@@ -1,0 +1,104 @@
+功能:读取文件元数据
+int stat(const char *path, struct stat *buf);
+int fstat(int fd, struct stat *buf);
+int lstat(const char *path, struct sat *buf);
+
+man 2 stat
+
+
+           struct stat {
+               dev_t     st_dev;         /* ID of device containing file */
+               ino_t     st_ino;         /* Inode number */
+               mode_t    st_mode;        /* File type and mode */
+               nlink_t   st_nlink;       /* Number of hard links */
+               uid_t     st_uid;         /* User ID of owner */
+               gid_t     st_gid;         /* Group ID of owner */
+               dev_t     st_rdev;        /* Device ID (if special file) */
+               off_t     st_size;        /* Total size, in bytes */
+               blksize_t st_blksize;     /* Block size for filesystem I/O */
+               blkcnt_t  st_blocks;      /* Number of 512B blocks allocated */
+
+               /* Since Linux 2.6, the kernel supports nanosecond
+                  precision for the following timestamp fields.
+                  For the details before Linux 2.6, see NOTES. */
+
+               struct timespec st_atim;  /* Time of last access */
+               struct timespec st_mtim;  /* Time of last modification */
+               struct timespec st_ctim;  /* Time of last status change */
+
+           #define st_atime st_atim.tv_sec      /* Backward compatibility */
+           #define st_mtime st_mtim.tv_sec
+           #define st_ctime st_ctim.tv_sec
+           };
+
+./01stat Makefile
+Filename:Makefile
+主:8, 次:3
+
+
+df Makefile
+Filesystem     1K-blocks     Used Available Use% Mounted on
+/dev/sda3       50954752 38229836  10428284  79% /
+
+ ls -l /dev/sda3
+brw-rw---- 1 root disk 8, 3 Jan  3 06:51 /dev/sda3
+可以看出主8, 次3
+
+ls -l /dev/tty1
+crw--w---- 1 gdm tty 4, 1 Jan  3 06:52 /dev/tty1
+主4, 次1
+
+
+ls -li Makefile
+3023330 -rwxrw-rw- 1 root root 124 Jan  3 21:11 Makefile
+st_ino 号码
+
+
+实现 ls -l 功能
+lstat
+
+#include <sys/types.h>
+#include <pwd.h>
+struct passwd *getpwuid(uid_t uid);
+
+           struct passwd {
+               char   *pw_name;       /* username */
+               char   *pw_passwd;     /* user password */
+               uid_t   pw_uid;        /* user ID */
+               gid_t   pw_gid;        /* group ID */
+               char   *pw_gecos;      /* user information */
+               char   *pw_dir;        /* home directory */
+               char   *pw_shell;      /* shell program */
+           };
+
+#include <sys/types.h>
+#include <grp.h>
+struct group *getgrgid(gid_t gid);
+               char   *gr_name;        /* group name */
+               char   *gr_passwd;      /* group password */
+               gid_t   gr_gid;         /* group ID */
+               char  **gr_mem;         /* NULL-terminated array of pointers
+                                          to names of group members */
+           };
+
+#include <unistd.h>   
+
+ln -s Makefile a
+ls -l a
+lrwxrwxrwx 1 root root 8 Jan  4 02:09 a -> Makefile
+ssize_t readlink(const char *pathname, char *buf, size_t bufsiz);
+
+
+./01stat /dev/tty1  
+crw--w---- 字符设备文件
+
+
+./01stat /dev/sda2
+brw-rw---- 块设备文件
+
+
+mkfifo p
+./01stat p
+prw-r--r-- 管道文件
+
+

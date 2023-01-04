@@ -43,9 +43,9 @@ ssize_t readn(int fd, void *buf, size_t count)
                 continue;
             }
             return  -1;
-        } else if (nread == 0)      // break
+        } else if (nread == 0)      // break, 如果对端关闭
         {
-            return count - nleft;
+            return count - nleft;       // 读了多少个字节
         }
 
         bufp += nread;                          // 下次读取存入位置 bufp += nread
@@ -57,12 +57,12 @@ ssize_t readn(int fd, void *buf, size_t count)
 ssize_t writen(int fd, const void *buf, size_t count)
 {
     size_t nleft = count;
-    ssize_t nwritten;
+    ssize_t nwritten;                   // 本次写入多少
     char* bufp = (char*)buf;
 
-    while (nleft > 0)
+    while (nleft > 0)                   // 剩余发送的字节数
     {
-        if ((nwritten = write(fd, bufp, nleft)) < 0)
+        if ((nwritten = write(fd, bufp, nleft)) < 0)        // 发送了多少字节
         {
             if (errno == EINTR)
             {
@@ -70,17 +70,17 @@ ssize_t writen(int fd, const void *buf, size_t count)
             }
             return -1;
         }
-        else if (nwritten == 0)
+        else if (nwritten == 0)             // 什么都没写, 继续
         {
             continue;
         }
-        bufp += nwritten;
-        nleft -= nwritten;
+        bufp += nwritten;                   // 发送指针
+        nleft -= nwritten;                  // 剩余发送的字节数
     }
-    return count;
+    return count;                           // 发送了多少字节
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv) {           // 解决了粘包问题
     // 1. 创建套接字
     int sockfd;
     if ((sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {

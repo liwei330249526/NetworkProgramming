@@ -1,0 +1,40 @@
+每个进程可以打开1024个文件描述符
+0  标准输入
+1  标准输出
+2  标准错误输出
+
+3 --
+4 --
+
+
+复制文件描述符
+实现重定向的功能
+
+fd=3; 文件表  v节点表
+     refcnt=1
+复制
+fd=4; 文件表  v节点表
+    refcnt=2
+
+
+
+
+int dup(int oldfd) 搜索空闲的文件描述符完成复制, 和要复制的文件描述符指向同一个文件
+int dup2(int oldfd, int newfd)  强制用新的文件描述符完成复制, 不管newfd是否空闲; 先close, 在dup
+fcntl(fd, F_DUPFD, fd_start), 从 fd_start 开始寻找空闲fd
+
+
+int fcntl(int fd, int cmd ..) 操纵文件描述符, 改变已经打开的文件的属性
+
+复制文件描述符 F_DUPDF(long)
+文件描述符标志
+F_GETFD(void)
+F_SETFD(long)
+
+文件状态标志
+F_GETFL(void)
+F_SETFL(long)
+
+文件锁
+F_GETLK
+FSETLK, F_SETLKW

@@ -111,7 +111,7 @@ void do_service(int connfd)
             break;
         }
         fputs(recvbuf.buf, stdout);
-        writen(connfd, &recvbuf, 4+n);
+        writen(connfd, &recvbuf, 4+n);              // 将来的信息, 写回去
     }
 
 }

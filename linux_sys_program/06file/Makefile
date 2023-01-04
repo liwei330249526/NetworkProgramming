@@ -1,7 +1,7 @@
 .PHONY:clean all
 CC=cc
 CFLAGS=-Wall -g
-BIN=01_byteorder 02addr
+BIN= 01stat
 all:$(BIN)
 %.o:%.c
 	$(CC) $(CFLAGS) -c $< -o $@
